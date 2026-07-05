@@ -1,0 +1,1 @@
+import mongoose from 'mongoose'; const schema=new mongoose.Schema({user:{type:mongoose.Schema.Types.ObjectId,ref:'User'},type:{type:String,required:true},applicantName:{type:String,required:true},purpose:String,status:{type:String,default:'pending'},certificateNumber:String},{timestamps:true}); export default mongoose.model('Certificate',schema);

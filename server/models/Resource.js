@@ -1,0 +1,1 @@
+import mongoose from 'mongoose'; const schema=new mongoose.Schema({name:{type:String,required:true},category:String,quantity:{type:Number,default:0},allocated:{type:Number,default:0},location:String,status:{type:String,default:'available'}},{timestamps:true}); export default mongoose.model('Resource',schema);
