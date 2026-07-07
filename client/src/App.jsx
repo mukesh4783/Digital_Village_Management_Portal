@@ -22,6 +22,7 @@ import CertificateDetail from './pages/CertificateDetail';
 import CertificatePreview from './pages/CertificatePreview';
 
 import Reports from './pages/Reports';
+import Notifications from './pages/Notifications';
 
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
@@ -56,7 +57,7 @@ export default function App(){
         <Route path="certificates/:id" element={<CertificateDetail/>}/>
         <Route path="certificates/:id/preview" element={<CertificatePreview/>}/>
         
-        <Route path="notifications" element={<CrudPage title="Announcements" endpoint="/notifications" fields={['title','message','type']}/>}/>
+        <Route path="notifications" element={<Notifications/>}/>
         <Route path="resources" element={<CrudPage title="Resources" endpoint="/resources" fields={['name','category','quantity','allocated','location']}/>}/>
         
         <Route path="reports" element={<Reports/>}/>

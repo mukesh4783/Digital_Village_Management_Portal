@@ -18,4 +18,20 @@ r.post('/',admin,async(q,s)=>{
   s.status(201).json(n);
 });
 
+r.get('/unread-count', async (q, s) => {
+  const filter = q.user.role === 'admin' 
+    ? { is_read: false } 
+    : { is_read: false, $or: [{target_user: null}, {target_user: q.user.id}] };
+  const count = await Notification.countDocuments(filter);
+  s.json({ count });
+});
+
+r.put('/read-all', async (q, s) => {
+  const filter = q.user.role === 'admin' 
+    ? { is_read: false } 
+    : { is_read: false, $or: [{target_user: null}, {target_user: q.user.id}] };
+  await Notification.updateMany(filter, { is_read: true });
+  s.json({ message: 'All read' });
+});
+
 export default r;
