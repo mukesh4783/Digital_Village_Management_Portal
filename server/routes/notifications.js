@@ -1,1 +1,21 @@
-import {Router} from 'express';import Notification from '../models/Notification.js';import {auth,admin} from '../middleware/auth.js';const r=Router();r.use(auth);r.get('/',async(q,s)=>s.json(await Notification.find().sort({createdAt:-1})));r.get('/unread-count',(q,s)=>s.json({count:0}));r.post('/',admin,async(q,s)=>s.status(201).json(await Notification.create({...q.body,createdBy:q.user.name})));r.put('/read-all',(q,s)=>s.json({message:'All read'}));r.put('/:id/read',(q,s)=>s.json({message:'Read'}));export default r;
+import {Router} from 'express';
+import Notification from '../models/Notification.js';
+import {auth,admin} from '../middleware/auth.js';
+
+const r=Router();
+r.use(auth);
+
+r.get('/',async(q,s)=>{
+  const filter = q.user.role === 'admin' 
+    ? {} 
+    : { $or: [{target_user: null}, {target_user: q.user.id}] };
+  const notifs = await Notification.find(filter).sort({createdAt:-1});
+  s.json(notifs);
+});
+
+r.post('/',admin,async(q,s)=>{
+  const n = await Notification.create({...q.body,createdBy:q.user.name});
+  s.status(201).json(n);
+});
+
+export default r;

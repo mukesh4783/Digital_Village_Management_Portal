@@ -1,5 +1,6 @@
 import {Router} from 'express';
 import {WelfareScheme,WelfareApplication} from '../models/Welfare.js';
+import Notification from '../models/Notification.js';
 import {auth,admin} from '../middleware/auth.js';
 const r=Router();r.use(auth);
 
@@ -29,6 +30,22 @@ r.post('/applications',async(q,s)=>{
   s.status(201).json(app);
 });
 
-r.put('/applications/:id',admin,async(q,s)=>s.json(await WelfareApplication.findByIdAndUpdate(q.params.id,q.body,{new:true})));
+r.put('/applications/:id',admin,async(q,s)=>{
+  const app = await WelfareApplication.findById(q.params.id);
+  if(!app) return s.status(404).json({error:'Not found'});
+  const oldStatus = app.status;
+  Object.assign(app, q.body);
+  if(q.body.status && q.body.status !== oldStatus && app.user) {
+    await Notification.create({
+      type: 'alert',
+      title: 'Welfare Application Update',
+      message: `Your application for "${app.scheme_name}" has been updated to "${q.body.status.replace(/_/g, ' ')}".`,
+      target_user: app.user,
+      createdBy: q.user.name
+    });
+  }
+  await app.save();
+  s.json(app);
+});
 
 export default r;

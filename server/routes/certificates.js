@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import Certificate from '../models/Certificate.js';
 import Citizen from '../models/Citizen.js';
+import Notification from '../models/Notification.js';
 import {auth,admin} from '../middleware/auth.js';
 const r=Router();r.use(auth);
 
@@ -49,6 +50,15 @@ r.put('/:id',admin,async(q,s)=>{
   if(q.body.status==='issued') cert.issue_date=new Date();
   if(q.body.status && q.body.status!==oldStatus){
     cert.status_history.push({status:q.body.status,note:q.body.admin_notes||`Status changed to ${q.body.status}`,changed_by:q.user.name,changed_at:new Date()});
+    if (cert.user) {
+      await Notification.create({
+        type: 'alert',
+        title: 'Certificate Update',
+        message: `Your ${cert.cert_type||cert.type} certificate request has been updated to "${q.body.status}".`,
+        target_user: cert.user,
+        createdBy: q.user.name
+      });
+    }
   }
   await cert.save();
   s.json(cert);

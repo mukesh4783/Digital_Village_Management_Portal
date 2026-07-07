@@ -1,5 +1,6 @@
 import {Router} from 'express';
 import Service from '../models/ServiceRequest.js';
+import Notification from '../models/Notification.js';
 import {auth,admin} from '../middleware/auth.js';
 const r=Router();r.use(auth);
 
@@ -29,6 +30,15 @@ r.put('/requests/:id',async(q,s)=>{
   Object.assign(svc,q.body);
   if(q.body.status && q.body.status!==oldStatus){
     svc.status_history.push({status:q.body.status,note:q.body.status_note||`Status changed to ${q.body.status}`,changed_by:q.user.name,changed_at:new Date()});
+    if(svc.user){
+      await Notification.create({
+        type: 'alert',
+        title: 'Service Request Update',
+        message: `Your service request "${svc.title}" has been updated to "${q.body.status.replace(/_/g, ' ')}".`,
+        target_user: svc.user,
+        createdBy: q.user.name
+      });
+    }
   }
   await svc.save();
   s.json(svc);
