@@ -2,6 +2,7 @@ import {Router} from 'express';
 import bcrypt from 'bcryptjs'; 
 import jwt from 'jsonwebtoken'; 
 import User from '../models/User.js';
+import Citizen from '../models/Citizen.js';
 
 const r=Router(); 
 const token=u=>jwt.sign({id:u._id,role:u.role,name:u.name},process.env.JWT_SECRET||'gramsetu_secure_jwt_secret_2024',{expiresIn:'7d'});
@@ -24,6 +25,14 @@ r.post('/register',async(req,res)=>{
       ...req.body,
       role,
       password:await bcrypt.hash(req.body.password,10)
+    });
+    
+    // Auto-create a linked Citizen profile when a user registers
+    await Citizen.create({
+      name: u.name,
+      email: u.email,
+      phone: req.body.phone || '',
+      status: 'active'
     });
     
     res.status(201).json({token:token(u),user:{id:u._id,name:u.name,email:u.email,role:u.role}});
