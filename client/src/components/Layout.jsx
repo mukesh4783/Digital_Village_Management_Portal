@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {NavLink,Outlet} from 'react-router-dom';
+import {NavLink,Outlet,useLocation} from 'react-router-dom';
 import {Home,Users,House,ClipboardList,HeartHandshake,FileBadge,Bell,Package,BarChart3,Shield,LogOut} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
 import Chatbot from './Chatbot';
@@ -37,6 +37,14 @@ export default function Layout(){
     }, 30000);
     return () => clearInterval(interval);
   }, [user]);
+
+  // Clear badge when visiting the notifications page
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === '/notifications') {
+      setUnreadCount(0);
+    }
+  }, [location]);
 
   return <>
     <div className="shell">
